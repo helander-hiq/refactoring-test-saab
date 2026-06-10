@@ -11,6 +11,18 @@ namespace TicketManagementSystem
 {
     public class TicketService
     {
+        private IUserRepository UserRepository { get; } 
+
+        public TicketService()
+        {
+            UserRepository = new UserRepository();
+        }
+
+        public TicketService(IUserRepository userRepository)
+        {
+            UserRepository = userRepository; 
+        }
+
         /// <summary>
         /// Create a ticket
         /// </summary>
@@ -114,11 +126,7 @@ namespace TicketManagementSystem
         /// <returns>A user. Null if no unser was found</returns>
         private User GetUser(string userName)
         {
-            User user = null;
-            using (var ur = GetUserRepository())
-            {
-                user = ur.GetUser(userName);
-            }
+            User user = UserRepository.GetUser(userName);
             
             return user; 
         }
@@ -136,11 +144,7 @@ namespace TicketManagementSystem
                 return null; 
             }
 
-            User manager = null;
-            using (var ur = GetUserRepository())
-            {
-                manager = ur.GetAccountManager();
-            }
+            User manager = UserRepository.GetAccountManager();
 
             return manager;
         }
@@ -219,12 +223,6 @@ namespace TicketManagementSystem
 
             return priority; 
 
-        }
-
-        // Added during development since I used a mocked repo instead on setting up a db
-        private IUserRepository GetUserRepository()
-        {
-            return new UserRepository(); //UserRepositoryMock();
         }
 
         private void WriteTicketToFile(Ticket ticket)

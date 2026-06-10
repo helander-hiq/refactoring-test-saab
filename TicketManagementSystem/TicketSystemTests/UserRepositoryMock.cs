@@ -1,22 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using TicketManagementSystem;
 
-namespace TicketManagementSystem
+namespace TicketSystemTests
 {
 
     /* 
-     * This class is just for testing. 
-     * The  limitations complicates using DI so I created this instead of setting up a database.
+     * simple alternative to a mocking framework
      */
-    internal class UserRepositoryMock : IUserRepository
+    public class UserRepositoryMock : IUserRepository
     {
-        public void Dispose()
-        {
-            //nothing to dispose
-        }
 
         public User GetAccountManager()
         {

@@ -10,7 +10,7 @@ namespace TicketSystemTests
     [TestFixture]
     internal class TicketManagementTests
     {
-        private TicketService _ticketService = new TicketService(); 
+        private TicketService _ticketService = new TicketService(new UserRepositoryMock()); 
 
      
         [Test]

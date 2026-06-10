@@ -5,12 +5,11 @@ namespace TicketManagementSystem
 {
     public class UserRepository : IUserRepository
     {
-        private SqlConnection connection;
-        
+        private string connectionString;
+
         public UserRepository()
         {
-            var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["database"].ConnectionString; 
-            connection = new SqlConnection(connectionString);
+            connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["database"].ConnectionString;
         }
         
         public User GetUser(string username)
@@ -18,25 +17,25 @@ namespace TicketManagementSystem
             // Assume this method does not need to change and is connected to a database with users populated.
             try
             {
-                string sql = "SELECT TOP 1 FROM Users u WHERE u.Username == @p1";
-                connection.Open();
-
-                var command = new SqlCommand(sql, connection)
+                using (SqlConnection connection = new SqlConnection(connectionString))
                 {
-                    CommandType = System.Data.CommandType.Text,
-                };
 
-                command.Parameters.Add("@p1", System.Data.SqlDbType.NVarChar).Value = username;
+                    string sql = "SELECT TOP 1 FROM Users u WHERE u.Username == @p1";
+                    connection.Open();
 
-                return (User)command.ExecuteScalar();
+                    var command = new SqlCommand(sql, connection)
+                    {
+                        CommandType = System.Data.CommandType.Text,
+                    };
+
+                    command.Parameters.Add("@p1", System.Data.SqlDbType.NVarChar).Value = username;
+
+                    return (User)command.ExecuteScalar();
+                }
             }
             catch (Exception)
             {
                 return null;
-            }
-            finally
-            {
-                connection.Close();
             }
         }
 
@@ -44,12 +43,6 @@ namespace TicketManagementSystem
         {
             // Assume this method does not need to change.
             return GetUser("Sarah");
-        }
-
-        public void Dispose()
-        {
-            // Assume this method does not need to change.
-            connection.Dispose();
         }
     }
 }

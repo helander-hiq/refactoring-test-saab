@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TicketManagementSystem
 {
-    internal interface IUserRepository : IDisposable
+    public interface IUserRepository
     {
         User GetUser(string username);
 
