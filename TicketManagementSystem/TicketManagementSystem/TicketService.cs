@@ -37,7 +37,6 @@ namespace TicketManagementSystem
         /// <exception cref="UnknownUserException">The user wasn't found</exception>
         public int CreateTicket(string t, Priority p, string assignedTo, string desc, DateTime d, bool isPayingCustomer)
         {
-
             (bool isValid, string[] messages) inputValidation  = ValidateCreateTicketInput(t, desc, assignedTo); 
             if (!inputValidation.isValid)
             {
@@ -58,9 +57,9 @@ namespace TicketManagementSystem
                 NotifyAdmin(t, assignedTo);
             }
 
-            var price = GetPrice(p, isPayingCustomer);
+            var price = isPayingCustomer ? GetPrice(p) : 0;
 
-            var accountManager = GetAccuntManager(isPayingCustomer);
+            var accountManager = isPayingCustomer ? GetAccuntManager() : null;
 
             var ticket = new Ticket()
             {
@@ -108,22 +107,12 @@ namespace TicketManagementSystem
             TicketRepository.UpdateTicket(ticket);
         }
 
-        /// <summary>
-        /// Notify admin about a ticket
-        /// </summary>
-        /// <param name="title">Title of the ticket</param>
-        /// <param name="assignedUser">User assigned to the ticket</param>
         private void NotifyAdmin(string title, string assignedUser)
         {
             var emailService = new EmailServiceProxy();
             emailService.SendEmailToAdministrator(title, assignedUser);
         }
 
-        /// <summary>
-        /// Get a user
-        /// </summary>
-        /// <param name="userName">User name</param>
-        /// <returns>A user. Null if no unser was found</returns>
         private User GetUser(string userName)
         {
             User user = UserRepository.GetUser(userName);
@@ -131,48 +120,21 @@ namespace TicketManagementSystem
             return user; 
         }
 
-        /// <summary>
-        /// Get an account manager
-        /// </summary>
-        /// <param name="isPayingCustomer">True is the customer is a paying customer, otherwise false</param>
-        /// <returns>A user object representing the account manager. Null if not found or of there is no account manager</returns>
-        private User GetAccuntManager(bool isPayingCustomer)
+        private User GetAccuntManager()
         {
-            // Only paid customers have an account manager.
-            if (!isPayingCustomer)
-            {
-                return null; 
-            }
-
             User manager = UserRepository.GetAccountManager();
 
             return manager;
         }
 
 
-        /// <summary>
-        /// Get price
-        /// </summary>
-        /// <param name="priority">Ticket priority</param>
-        /// <param name="isPayingCustomer">True is the customer is a paying customer</param>
-        /// <returns>The price</returns>
-        private double GetPrice(Priority priority, bool isPayingCustomer)
+        private double GetPrice(Priority priority)
         {
-            double price = 0;
-            if (isPayingCustomer)
-            {
-                price = priority == Priority.High ? 100 : 50;
-            }
+            var price = priority == Priority.High ? 100 : 50;
+
             return price;
         }
 
-        /// <summary>
-        /// Validate teh input to the ticket creation
-        /// </summary>
-        /// <param name="title">Title</param>
-        /// <param name="description">Description</param>
-        /// <param name="assignedTo">User assigned to ticket</param>
-        /// <returns>True if the inout is valid, otherwise false, as well as a list of messages</returns>
         private (bool isValid, string[] messages) ValidateCreateTicketInput(string title, string description, string assignedTo)
         {
             var messages = new List<string>();
@@ -198,13 +160,6 @@ namespace TicketManagementSystem
             return (valid, messages.ToArray()); 
         }
 
-        /// <summary>
-        /// gets the ticket priority based in date and title
-        /// </summary>
-        /// <param name="currentPriority">Current priority</param>
-        /// <param name="ticketDateTime">Datetime for the ticket</param>
-        /// <param name="title">Title fo the ticket</param>
-        /// <returns></returns>
         private Priority GetTicketPriority(Priority currentPriority, DateTime ticketDateTime, string title)
         {
             if (currentPriority == Priority.High)
